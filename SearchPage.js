@@ -25,6 +25,38 @@ var styles = StyleSheet.create ({
   }
 });
 
+class SearchPage extends Component {
+  render() {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.description}>
+          Search for houses to buy!
+        </Text>
+        <Text style={styles.description}>
+            Search by place-name, postcode or search near your location.
+        </Text>
+      </View>
+    );
+  }
+}
+
+module.exports = SearchPage;
+
+// class SearchPage extends Component {
+//   render() {
+//     return (
+//       <View style={styles.container}>
+//         <Text style={styles.description}>
+//           Search for houses to buy!
+//         </Text>
+//         <Text style={styles.description}>
+//           Search by place-name, postcode or search near your location.
+//         </Text>
+//       </View>
+//     );
+//   }
+// }
+
 // var styles = StyleSheet.create({
 //   description: {
 //     marginBottom: 20,
