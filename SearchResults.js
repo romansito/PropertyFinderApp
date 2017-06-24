@@ -10,6 +10,7 @@ import {
   Text
 } from 'react-native';
 
+var PropertyView = require('./PropertyView');
 
 var styles = StyleSheet.create({
   thumb: {
