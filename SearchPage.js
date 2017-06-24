@@ -9,11 +9,11 @@ import {
   TouchableHighlight,
   ActivityIndicator,
   Image
-} from 'react-native'
+} from 'react-native';
 
 var SearchResults = require('./SearchResults');
 
-var styles = StyleSheet.create ({
+var styles = StyleSheet.create({
   description: {
     marginBottom: 20,
     fontSize: 18,
@@ -60,7 +60,7 @@ var styles = StyleSheet.create ({
   },
   image: {
     width: 217,
-    height: 138,
+    height: 138
   }
 });
 
@@ -83,7 +83,6 @@ function urlForQueryAndPage(key, value, pageNumber) {
 };
 
 class SearchPage extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -91,20 +90,6 @@ class SearchPage extends Component {
       isLoading: false,
       message: ''
     };
-  }
-
-  _handleResponse(response) {
-    this.setState({ isLoading: false , message: '' });
-    if (response.application_response_code.substr(0, 1) === '1') {
-      // console.log('Properties found: ' + response.listings.length);
-      this.props.navigator.push({
-        title: 'Results',
-        component: SearchResults,
-        passProps: {listings: response.listings}
-      });
-    } else {
-      this.setState({ message: 'Location not recognized; please try again.'});
-    }
   }
 
   onSearchTextChanged(event) {
@@ -121,10 +106,23 @@ class SearchPage extends Component {
     .then(response => response.json())
     .then(json => this._handleResponse(json.response))
     .catch(error =>
-      this.setState({
+       this.setState({
         isLoading: false,
         message: 'Something bad happened ' + error
-      }));
+     }));
+  }
+
+  _handleResponse(response) {
+    this.setState({ isLoading: false , message: '' });
+    if (response.application_response_code.substr(0, 1) === '1') {
+      this.props.navigator.push({
+        title: 'Results',
+        component: SearchResults,
+        passProps: {listings: response.listings}
+      });
+    } else {
+      this.setState({ message: 'Location not recognized; please try again.'});
+    }
   }
 
   onSearchPressed() {
@@ -132,45 +130,61 @@ class SearchPage extends Component {
     this._executeQuery(query);
   }
 
+  onLocationPressed() {
+    navigator.geolocation.getCurrentPosition(
+      location => {
+        var search = location.coords.latitude + ',' + location.coords.longitude;
+        this.setState({ searchString: search });
+        var query = urlForQueryAndPage('centre_point', search, 1);
+        this._executeQuery(query);
+      },
+      error => {
+        this.setState({
+          message: 'There was a problem with obtaining your location: ' + error
+        });
+      });
+  }
+
   render() {
     console.log('SearchPage.render');
 
     var spinner = this.state.isLoading ?
-      ( <ActivityIndicator
-          size='large'/> ) :
-      ( <View/>);
+    ( <ActivityIndicator
+        size='large'/> ) :
+    ( <View/>);
 
     return (
       <View style={styles.container}>
         <Text style={styles.description}>
           Search for houses to buy!
         </Text>
-        <Text style={styles.description}>
-            Search by place-name, postcode or search near your location.
-        </Text>
+        <TextInput
+          style={styles.searchInput}
+          value={this.state.searchString}
+          onChange={this.onSearchTextChanged.bind(this)}
+          placeholder='Search via name or postcode'/>
         <View style={styles.flowRight}>
           <TextInput
             style={styles.searchInput}
-            value={this.state.searchString}
-            onChange={this.onSearchTextChanged.bind(this)}
             placeholder='Search via name or postcode'/>
-              <TouchableHighlight style={styles.button}
-                underlayColor='#99d9f4'>
-                <Text
-                  style={styles.buttonText}
-                  onPress={this.onSearchPressed.bind(this)}>
-                  Go
-                  </Text>
-              </TouchableHighlight>
-        </View>
-          <TouchableHighlight
-            style={styles.button}
-            underlayColor='#99d9f4'>
-            <Text style={styles.buttonText}>Location</Text>
+          <TouchableHighlight style={styles.button}
+              underlayColor='#99d9f4'>
+            <Text
+              style={styles.buttonText}
+              onPress={this.onSearchPressed.bind(this)}>
+              Go
+            </Text>
           </TouchableHighlight>
-          <Image source={require('./Resources/house.png')} style={styles.image}/>
-          {spinner}
-          <Text style={styles.description}>{this.state.message}</Text>
+        </View>
+        <TouchableHighlight
+          style={styles.button}
+          onPress={this.onLocationPressed.bind(this)}
+          underlayColor='#99d9f4'>
+          <Text style={styles.buttonText}>Location</Text>
+        </TouchableHighlight>
+        <Image source={require('./Resources/house.png')} style={styles.image}/>
+        {spinner}
+        <Text style={styles.description}>{this.state.message}</Text>
       </View>
     );
   }
